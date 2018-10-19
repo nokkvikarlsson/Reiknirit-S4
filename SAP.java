@@ -3,6 +3,10 @@ package S4;
 import edu.princeton.cs.algs4.BreadthFirstDirectedPaths;
 import edu.princeton.cs.algs4.Digraph;
 import edu.princeton.cs.algs4.DirectedCycle;
+import edu.princeton.cs.algs4.In;
+import edu.princeton.cs.algs4.Out;
+import edu.princeton.cs.algs4.StdIn;
+import edu.princeton.cs.algs4.StdOut;
 
 public class SAP {
 	
@@ -35,7 +39,7 @@ public class SAP {
 		}
 		
 		//If root counter isn't exactly one the graph is not rooted.
-		if(rootCounter < 1 && rootCounter > 1) {
+		if(1 != rootCounter) {
 			throw new IllegalArgumentException("Graph is not rooted");
 		}
 		
@@ -69,8 +73,7 @@ public class SAP {
 	// do unit testing of this class
 	public static void main ( String [] args ) {
 		
-		
-		
-		
 	}
+		
+
 }
