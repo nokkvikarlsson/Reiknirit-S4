@@ -28,7 +28,7 @@ public class SAP {
 			throw new IllegalArgumentException("Graph is not acyclic");
 		}
 		
-		//Keep count of number of vertexes that have no directed path to another vertex.
+		//Keep count of the number of vertexes that have no directed path to another vertex.
 		int rootCounter = 0;
 		
 		//Loops over every vertex and checks if any vertex has no directed path to another.
@@ -49,17 +49,45 @@ public class SAP {
 	// length of shortest ancestral path between v and w; -1 if no such path
 	public int length ( int v , int w) {
 		
-		return 1;
+		//TODO: Check if out of bounds
+		
+		BFD_V = new BreadthFirstDirectedPaths(digraph, v);
+		BFD_W = new BreadthFirstDirectedPaths(digraph, w);
+		
+		//We use shortest to keep track of our shortest path, we initialize it as -1.
+		int shortestPath = -1;
+		//A variable we use to keep track of our current length between the vertexes.
+		int length = 0;
+		
+		for(int i = 0; i < digraph.V(); i++) {
+			//Checks if there is a path from v and w to i.
+			if(BFD_V.hasPathTo(i) && BFD_W.hasPathTo(i)) {
+				//If there is a path from both v and w then add the distance from both paths.
+				length = BFD_V.distTo(i) + BFD_W.distTo(i);
+			}
+			//If length is smaller than shorterstPath then shortestpath gets the value from length.
+			if(length <= shortestPath) {
+				shortestPath = length;
+			}
+		}
+		
+		//Return shortestPath, it's -1 if there is no path
+		return shortestPath;
 	}
 	
 	// a shortest common common ancestor of v and w; -1 if no such path
 	public int ancestor ( int v , int w) {
+		
+		
 		
 		return 1;
 	}
 	
 	// length of shortest ancestral path of vertex subsets A and B ; -1 if no such path
 	public int length ( Iterable < Integer > A , Iterable < Integer > B) {
+		
+		
+		
 		
 		return 1;
 	}
