@@ -1,14 +1,25 @@
 package S4;
 
+import edu.princeton.cs.algs4.BreadthFirstDirectedPaths;
 import edu.princeton.cs.algs4.Digraph;
+import edu.princeton.cs.algs4.DirectedCycle;
 
 public class SAP {
 	
-	Digraph graph;
+	private Digraph digraph;
+	private BreadthFirstDirectedPaths BFD;
 	
 	// constructor takes a digraph ( not necessarily a DAG )
 	public SAP ( Digraph G) {
 		
+		digraph = new Digraph(G);
+		
+		//Create a DirectedCycle data type to and copy digraph G into it so we can check if the graph is a DAG.
+		DirectedCycle cycle = new DirectedCycle(G);
+		
+		if(cycle.hasCycle()){
+			throw new IllegalArgumentException("The graph is not DAG");
+		}
 	}
 	
 	
