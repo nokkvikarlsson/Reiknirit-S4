@@ -46,6 +46,7 @@ public class SAP {
 	// length of shortest ancestral path between v and w; -1 if no such path
 	public int length(int v, int w) {
 		
+		//Checks if the input is out of bounds.
 		checkOneInput(v, w);
 		
 		BreadthFirstDirectedPaths BFD_V = new BreadthFirstDirectedPaths(digraph, v);
@@ -64,15 +65,17 @@ public class SAP {
 	}
 	
 	// a shortest common common ancestor of v and w; -1 if no such path.
+	//Same functionality as in ancestor(int v, int w)
 	public int ancestor (int v, int w) {
 		
+		//Checks if the input is out of bounds.
 		checkOneInput(v, w);
 		
 		BreadthFirstDirectedPaths BFD_V = new BreadthFirstDirectedPaths(digraph, v);
 		BreadthFirstDirectedPaths BFD_W = new BreadthFirstDirectedPaths(digraph, w);
 		
 		int shortestCurrentAncestor = -1;
-		int lengthSCA = Integer.MAX_VALUE;
+		int lengthSCA = Integer.MAX_VALUE; //Length of the current ancestor
 		int length = 0;
 		
 		//Find the shortest common ancestor.
@@ -81,9 +84,9 @@ public class SAP {
 			if(BFD_V.hasPathTo(i) && BFD_W.hasPathTo(i)) {
 				//Sum the distance from i to vertex v and w and store it in length.
 				length = BFD_V.distTo(i) + BFD_W.distTo(i);
-
+				//Checks if the length is smaller than the length of the current ancestor.
+				//If it is then lengthSCA gets the value of length and shortestCurrentAncestor gets the value of i.
 				if(length <= lengthSCA) {
-
 					lengthSCA = length;
 					shortestCurrentAncestor = i;
 				}
@@ -93,8 +96,10 @@ public class SAP {
 	}
 	
 	// length of shortest ancestral path of vertex subsets A and B ; -1 if no such path
+	//Same functionality as in length(int v, int w)
 	public int length(Iterable<Integer> A, Iterable<Integer> B) {
 		
+		//Checks if the input is out of bounds.
 		checkMultipleInputs(A, B);
 		
 		BreadthFirstDirectedPaths BFD_A = new BreadthFirstDirectedPaths(digraph, A);
@@ -109,8 +114,10 @@ public class SAP {
 	}
 	
 	// a shortest common ancestor of vertex subsets A and B; -1 if no such path
+	//Same functionality as in ancestor(int v, int w)
 	public int ancestor(Iterable<Integer>A, Iterable<Integer> B) {
 		
+		//Checks if the input is out of bounds.
 		checkMultipleInputs(A, B);
 		
 		BreadthFirstDirectedPaths BFD_A = new BreadthFirstDirectedPaths(digraph, A);
@@ -132,12 +139,14 @@ public class SAP {
 		return shortestCurrentAncestor;
 	}
 	
+	//Checks if the vertices are in the graph
 	private void checkOneInput(int v, int w) {
 		if(v < 0 || w < 0 || v >= digraph.V() || w >= digraph.V()) {
 			throw new IndexOutOfBoundsException();
 		}
 	}
 	
+	//Checks if the vertices are in the graph
 	private void checkMultipleInputs(Iterable<Integer>A, Iterable<Integer> B) {
 		for(int a: A) {
 			if(a < 0  || a >= digraph.V()) {
@@ -154,17 +163,6 @@ public class SAP {
 	// do unit testing of this class
 	public static void main (String [] args) {
        
-		In in = new In("./wordnet-data/digraph1.txt");
-        //In in = new In(args[0]);
-        Digraph G = new Digraph(in);
-        SAP sap = new SAP(G);
-
-        while (!StdIn.isEmpty()) {
-            int v = StdIn.readInt();
-            int w = StdIn.readInt();
-            int length = sap.length(v, w);
-            int ancestor = sap.ancestor(v, w);
-            StdOut.printf("length = %d, ancestor = %d\n", length, ancestor);
-        }
+		
 	}
 }

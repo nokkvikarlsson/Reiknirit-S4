@@ -1,4 +1,4 @@
-package s4;
+package S4;
 
 public class WordNet {
 
