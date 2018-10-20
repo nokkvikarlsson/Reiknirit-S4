@@ -74,7 +74,7 @@ public class SAP {
 		for(int i = 0; i < digraph.V(); i++) {
 			if(BFD_V.hasPathTo(i) && BFD_W.hasPathTo(i)) {
 				length = BFD_V.distTo(i) + BFD_W.distTo(i);
-				if(length < lengthSCA) {
+				if(length <= lengthSCA) {
 					lengthSCA = length;
 					shortestCurrentAncestor = i;
 				}
@@ -114,7 +114,7 @@ public class SAP {
 		for(int i = 0; i < digraph.V(); i++) {
 			if(BFD_A.hasPathTo(i) && BFD_B.hasPathTo(i)) {
 				length = BFD_A.distTo(i) + BFD_B.distTo(i);
-				if(length < lengthSCA) {
+				if(length <= lengthSCA) {
 					lengthSCA = length;
 					shortestCurrentAncestor = i;
 				}
