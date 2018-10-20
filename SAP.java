@@ -1,4 +1,4 @@
-package s4;
+package S4;
 
 import edu.princeton.cs.algs4.BreadthFirstDirectedPaths;
 import edu.princeton.cs.algs4.Digraph;
@@ -51,15 +51,19 @@ public class SAP {
 		BreadthFirstDirectedPaths BFD_V = new BreadthFirstDirectedPaths(digraph, v);
 		BreadthFirstDirectedPaths BFD_W = new BreadthFirstDirectedPaths(digraph, w);
 		
+		//Finds the shortest ancestor between the two vertices.
 		int shortestAncestor = ancestor(v, w);
+
+		//If there is no ancestor return -1.
 		if(shortestAncestor == -1) {
 			return -1;
 		}
 		
+		//Return the sum of the lengths from the ancestor to vertex v and w.
 		return BFD_V.distTo(shortestAncestor) + BFD_W.distTo(shortestAncestor);
 	}
 	
-	// a shortest common common ancestor of v and w; -1 if no such path
+	// a shortest common common ancestor of v and w; -1 if no such path.
 	public int ancestor (int v, int w) {
 		
 		checkOneInput(v, w);
@@ -71,10 +75,14 @@ public class SAP {
 		int lengthSCA = Integer.MAX_VALUE;
 		int length = 0;
 		
+		//Find the shortest common ancestor.
 		for(int i = 0; i < digraph.V(); i++) {
+			//Checks if there is a path from vertex i to v and w.
 			if(BFD_V.hasPathTo(i) && BFD_W.hasPathTo(i)) {
+				//Sum the distance from i to vertex v and w and store it in length.
 				length = BFD_V.distTo(i) + BFD_W.distTo(i);
 				if(length < lengthSCA) {
+					
 					lengthSCA = length;
 					shortestCurrentAncestor = i;
 				}
@@ -143,7 +151,19 @@ public class SAP {
 	}
 	
 	// do unit testing of this class
-	public static void main ( String [] args ) {
-		
+	public static void main (String [] args) {
+       
+		In in = new In("./wordnet-data/digraph1.txt");
+        //In in = new In(args[0]);
+        Digraph G = new Digraph(in);
+        SAP sap = new SAP(G);
+
+        while (!StdIn.isEmpty()) {
+            int v = StdIn.readInt();
+            int w = StdIn.readInt();
+            int length = sap.length(v, w);
+            int ancestor = sap.ancestor(v, w);
+            StdOut.printf("length = %d, ancestor = %d\n", length, ancestor);
+        }
 	}
 }
