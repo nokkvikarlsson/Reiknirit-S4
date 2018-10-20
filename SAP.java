@@ -50,17 +50,22 @@ public class WordNet {
 		}
 	}
 	
-	private void fillSAP(In hypernymfile) {
-		Bag<Queue<String>> edges = new Bag<Queue<String>>();
-		String line = "";
-		while(hypernymfile.hasNextLine()) {
-			line = hypernymfile.readLine();
-			String[] splitstring = line.split(",");
-			Queue<String> newEdges = new Queue<String>();
-			for(String s: splitstring) {
-				newEdges.enqueue(s);
-			}
-			edges.add(newEdges);
+	
+	// length of shortest ancestral path between v and w; -1 if no such path
+	public int length(int v, int w) {
+		
+		//Checks if the input is out of bounds.
+		checkOneInput(v, w);
+		
+		BreadthFirstDirectedPaths BFD_V = new BreadthFirstDirectedPaths(digraph, v);
+		BreadthFirstDirectedPaths BFD_W = new BreadthFirstDirectedPaths(digraph, w);
+		
+		//Finds the shortest ancestor between the two vertices.
+		int shortestAncestor = ancestor(v, w);
+
+		//If there is no ancestor return -1.
+		if(shortestAncestor == -1) {
+			return -1;
 		}
 		
 		Digraph d = new Digraph(words.length);
@@ -72,41 +77,76 @@ public class WordNet {
 		}
 		sap = new SAP(d);
 	}
-	
-	//returns the index of the word. returns -1 if not found
-	private int getIndex(String word) {
-		int index = -1;
-		for(int i = 0; i < words.length; i++) {
-			for(String n: words[i].nouns) {
-				if(word.equals(n)) {
-					index = i;
+
+	// a shortest common common ancestor of v and w; -1 if no such path.
+	//Same functionality as in ancestor(int v, int w)
+	public int ancestor (int v, int w) {
+		
+		//Checks if the input is out of bounds.
+		checkOneInput(v, w);
+		
+		BreadthFirstDirectedPaths BFD_V = new BreadthFirstDirectedPaths(digraph, v);
+		BreadthFirstDirectedPaths BFD_W = new BreadthFirstDirectedPaths(digraph, w);
+		
+		int shortestCurrentAncestor = -1;
+		int lengthSCA = Integer.MAX_VALUE; //Length of the current ancestor
+		int length = 0;
+		
+		//Find the shortest common ancestor.
+		for(int i = 0; i < digraph.V(); i++) {
+			//Checks if there is a path from vertex i to v and w.
+			if(BFD_V.hasPathTo(i) && BFD_W.hasPathTo(i)) {
+				//Sum the distance from i to vertex v and w and store it in length.
+				length = BFD_V.distTo(i) + BFD_W.distTo(i);
+				//Checks if the length is smaller than the length of the current ancestor.
+				//If it is then lengthSCA gets the value of length and shortestCurrentAncestor gets the value of i.
+				if(length <= lengthSCA) {
+					lengthSCA = length;
+					shortestCurrentAncestor = i;
 				}
 			}
 		}
 		return index;
 	}
 	
-	//Returns all WordNet nouns
-	public Iterable<String> nouns(){
-		Bag<String> output = new Bag<String>();
-		for(Word w: words) {
-			for(String n: w.nouns) {
-				output.add(n);
-			}
+	// length of shortest ancestral path of vertex subsets A and B ; -1 if no such path
+	//Same functionality as in length(int v, int w)
+	public int length(Iterable<Integer> A, Iterable<Integer> B) {
+		
+		//Checks if the input is out of bounds.
+		checkMultipleInputs(A, B);
+		
+		BreadthFirstDirectedPaths BFD_A = new BreadthFirstDirectedPaths(digraph, A);
+		BreadthFirstDirectedPaths BFD_B = new BreadthFirstDirectedPaths(digraph, B);
+		
+		int shortestAncestor = ancestor(A, B);
+		if(shortestAncestor == -1) {
+			return -1;
 		}
 		
 		return output;
 	}
 	
-	//Is the word a WordNet noun?
-	public boolean isNoun(String word) {
+	// a shortest common ancestor of vertex subsets A and B; -1 if no such path
+	//Same functionality as in ancestor(int v, int w)
+	public int ancestor(Iterable<Integer>A, Iterable<Integer> B) {
 		
-		boolean output = false;
-		for(Word w: words) {
-			for(String n: w.nouns) {
-				if(word.equals(n)) {
-					output = true;
-					break;
+		//Checks if the input is out of bounds.
+		checkMultipleInputs(A, B);
+		
+		BreadthFirstDirectedPaths BFD_A = new BreadthFirstDirectedPaths(digraph, A);
+		BreadthFirstDirectedPaths BFD_B = new BreadthFirstDirectedPaths(digraph, B);
+		
+		int shortestCurrentAncestor = -1;
+		int lengthSCA = Integer.MAX_VALUE;
+		int length = 0;
+		
+		for(int i = 0; i < digraph.V(); i++) {
+			if(BFD_A.hasPathTo(i) && BFD_B.hasPathTo(i)) {
+				length = BFD_A.distTo(i) + BFD_B.distTo(i);
+				if(length <= lengthSCA) {
+					lengthSCA = length;
+					shortestCurrentAncestor = i;
 				}
 			}
 		}
@@ -114,26 +154,21 @@ public class WordNet {
 		return output;
 	}
 	
-	//Distance between Noun A and Noun B (defined below)
-	public int distance(String nounA, String nounB) {
-		int indexA = getIndex(nounA);
-		int indexB = getIndex(nounB);
-		
-		if(indexA == -1 || indexB == -1) {
-			throw new IllegalArgumentException();
+	//Checks if the vertices are in the graph
+	private void checkOneInput(int v, int w) {
+		if(v < 0 || w < 0 || v >= digraph.V() || w >= digraph.V()) {
+			throw new IndexOutOfBoundsException();
 		}
 		
 		return sap.length(indexA, indexB);
 	}
 	
-	//A synset (second field of synsets.txt) that is the shortest common ancestor
-	//of Noun A and Noun B
-	public String sap(String nounA, String nounB) {
-		int indexA = getIndex(nounA);
-		int indexB = getIndex(nounB);
-		
-		if(indexA == -1 || indexB == -1) {
-			throw new IllegalArgumentException();
+	//Checks if the vertices are in the graph
+	private void checkMultipleInputs(Iterable<Integer>A, Iterable<Integer> B) {
+		for(int a: A) {
+			if(a < 0  || a >= digraph.V()) {
+				throw new IndexOutOfBoundsException();
+			}
 		}
 		
 		int ancestorid = sap.ancestor(indexA, indexB);
@@ -146,8 +181,9 @@ public class WordNet {
 		return output.substring(1);
 	}
 	
-	//Do unit testing of this class
-	public static void main(String[] args) {
-		WordNet w = new WordNet(args[1], args[2]);
+	// do unit testing of this class
+	public static void main (String [] args) {
+       
+		
 	}
 }
