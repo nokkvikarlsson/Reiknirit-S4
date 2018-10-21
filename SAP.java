@@ -1,53 +1,45 @@
 package s4;
 
-import edu.princeton.cs.algs4.Bag;
+import edu.princeton.cs.algs4.BreadthFirstDirectedPaths;
 import edu.princeton.cs.algs4.Digraph;
+import edu.princeton.cs.algs4.DirectedCycle;
 import edu.princeton.cs.algs4.In;
-import edu.princeton.cs.algs4.Queue;
+import edu.princeton.cs.algs4.Out;
+import edu.princeton.cs.algs4.StdIn;
+import edu.princeton.cs.algs4.StdOut;
 
-public class WordNet {
-
-	private SAP sap;
-	private Word[] words;
+public class SAP {
 	
-	private static class Word {
-		private int id;
-		private Queue<String> nouns;
-		private String desc;
-	}
+	private Digraph digraph;
 	
-	//Constructor takes the names of the two input files
-	public WordNet(String synsets, String hypernyms) {
-		In synsetfile = new In(synsets);
-		In hypernymfile = new In(hypernyms);
+	// constructor takes a digraph ( not necessarily a DAG )
+	public SAP(Digraph G) {
 		
-		fillWords(synsetfile);
-		fillSAP(hypernymfile);
-	}
-	
-	private void fillWords(In synsetfile) {
-		String line = "";
-		Queue<Word> queueOfWords = new Queue<Word>();
-		while(synsetfile.hasNextLine()) {
-			line = synsetfile.readLine();
-			Word newWord = new Word();
-			String[] splitstring = line.split(",");
-			int newId = Integer.parseInt(splitstring[0]);
-			String[] lineNouns = splitstring[1].split(" ");
-			Queue<String> newNouns = new Queue<String>();
-			for(String l: lineNouns) {
-				newNouns.enqueue(l);
+		//Copy the digraph G to our digraph variable.
+		digraph = new Digraph(G);
+		
+		//Create a DirectedCycle data type to and copy digraph G into it so we can check if the graph is a DAG.
+		DirectedCycle cycle = new DirectedCycle(G);
+		
+		if(cycle.hasCycle()){
+			throw new IllegalArgumentException("Graph is not acyclic");
+		}
+		
+		//Keep count of the number of vertexes that have no directed path to another vertex.
+		int rootCounter = 0;
+		
+		//Loops over every vertex and checks if any vertex has no directed path to another.
+		for(int i = 0; i < digraph.V(); i++) {
+			if(!digraph.adj(i).iterator().hasNext()) {
+				rootCounter++; //If a vertex has no directed path it's a root.
 			}
-			newWord.id = newId;
-			newWord.nouns = newNouns;
-			newWord.desc = splitstring[2];
-			queueOfWords.enqueue(newWord);
 		}
 		
-		words = new Word[queueOfWords.size()];
-		for(Word w: queueOfWords) {
-			words[w.id] = w;
+		//If root counter isn't exactly one the graph is not rooted.
+		if(rootCounter != 1) {
+			throw new IllegalArgumentException("Graph is not rooted");
 		}
+		
 	}
 	
 	
@@ -68,16 +60,10 @@ public class WordNet {
 			return -1;
 		}
 		
-		Digraph d = new Digraph(words.length);
-		for(Queue<String> q: edges) {
-			int connectedFrom = Integer.parseInt(q.dequeue());
-			for(String s: q) {
-				d.addEdge(connectedFrom, Integer.parseInt(s));
-			}
-		}
-		sap = new SAP(d);
+		//Return the sum of the lengths from the ancestor to vertex v and w.
+		return BFD_V.distTo(shortestAncestor) + BFD_W.distTo(shortestAncestor);
 	}
-
+	
 	// a shortest common common ancestor of v and w; -1 if no such path.
 	//Same functionality as in ancestor(int v, int w)
 	public int ancestor (int v, int w) {
@@ -106,7 +92,7 @@ public class WordNet {
 				}
 			}
 		}
-		return index;
+		return shortestCurrentAncestor;
 	}
 	
 	// length of shortest ancestral path of vertex subsets A and B ; -1 if no such path
@@ -124,7 +110,7 @@ public class WordNet {
 			return -1;
 		}
 		
-		return output;
+		return BFD_A.distTo(shortestAncestor) + BFD_B.distTo(shortestAncestor);
 	}
 	
 	// a shortest common ancestor of vertex subsets A and B; -1 if no such path
@@ -150,8 +136,7 @@ public class WordNet {
 				}
 			}
 		}
-		
-		return output;
+		return shortestCurrentAncestor;
 	}
 	
 	//Checks if the vertices are in the graph
@@ -159,8 +144,6 @@ public class WordNet {
 		if(v < 0 || w < 0 || v >= digraph.V() || w >= digraph.V()) {
 			throw new IndexOutOfBoundsException();
 		}
-		
-		return sap.length(indexA, indexB);
 	}
 	
 	//Checks if the vertices are in the graph
@@ -170,15 +153,11 @@ public class WordNet {
 				throw new IndexOutOfBoundsException();
 			}
 		}
-		
-		int ancestorid = sap.ancestor(indexA, indexB);
-		String output = "";
-		for(String n: words[ancestorid].nouns) {
-			output += " ";
-			output += n;
+		for(int b: B) {
+			if(b < 0  || b >= digraph.V()) {
+				throw new IndexOutOfBoundsException();
+			}
 		}
-		
-		return output.substring(1);
 	}
 	
 	// do unit testing of this class
